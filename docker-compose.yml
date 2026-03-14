@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: otp-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-otpuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-otppassword}
+      POSTGRES_DB: ${DB_NAME:-otp_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-otpuser}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - otp-network
+
+  crypto-service:
+    build:
+      context: ./crypto-service
+      dockerfile: Dockerfile
+    container_name: otp-crypto
+    environment:
+      RUST_LOG: ${LOG_LEVEL:-info}
+      RUST_PORT: ${RUST_PORT:-9090}
+    ports:
+      - "9090:9090"
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - otp-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: otp-api
+    environment:
+      GO_PORT: ${GO_PORT:-8080}
+      DATABASE_URL: postgres://${DB_USER:-otpuser}:${DB_PASSWORD:-otppassword}@postgres:5432/${DB_NAME:-otp_db}?sslmode=disable
+      CRYPTO_SERVICE_URL: http://crypto-service:9090
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      crypto-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - otp-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  otp-network:
+    driver: bridge
