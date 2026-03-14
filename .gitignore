@@ -1,0 +1,70 @@
+# Go Backend
+backend/vendor/
+backend/.env
+backend/.env.local
+backend/bin/
+backend/dist/
+backend/*.log
+backend/.idea/
+backend/.vscode/
+backend/*.iml
+
+# Rust Crypto Service
+crypto-service/target/
+crypto-service/.env
+crypto-service/.env.local
+crypto-service/Cargo.lock
+crypto-service/.idea/
+crypto-service/.vscode/
+
+# General
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+build/
+dist/
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Logs
+*.log
+logs/
+
+# Dependencies
+node_modules/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Docker
+.dockerignore
+
+# Local development
+.env.development
+.env.test
