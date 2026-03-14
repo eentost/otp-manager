@@ -1,0 +1,17 @@
+[package]
+name = "otp-crypto"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.35", features = ["full"] }
+tonic = "0.10"
+prost = "0.12"
+sha1 = "0.10"
+hmac = "0.12"
+aes-gcm = "0.10"
+rand = "0.8"
+base64 = "0.21"
+
+[build-dependencies]
+tonic-build = "0.10"
